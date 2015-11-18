@@ -29,7 +29,7 @@ int main(int argc,char** argv)
       preencheVetor(vet, TAM);
 
       // Separa um vetor em dois e retorna um pivô. 
-      pivo = separa(vet, 0, TAM -1);
+      pivo = separa(vet, 0, TAM);
 
       // Empacgota o vetor para ser enviados aos processos
       MPI_Pack(vet, TAM, MPI_INT, buffer, TAM * 4, &posicao, MPI_COMM_WORLD);
@@ -81,19 +81,26 @@ int main(int argc,char** argv)
      // memcpy(vet3, vet1, pivo * sizeof(int));
      // memcpy(vet3 + pivo, vet2, (TAM - pivo) * sizeof(int));
 
-    //printf("Pivo = %d\n", pivo );
+      printf("\nPivo = %d\n\n", pivo );
+
       MPI_Recv(vet, TAM, MPI_INT, 1, tag, MPI_COMM_WORLD, &status);
+
+      printf("Vetor 01 => ");
+      for(i = 0; i <= pivo; i++){
+        printf("%d - ", vet[i]);
+      }
+      printf("\n\n");
+
       MPI_Recv(vet, TAM, MPI_INT, 2, tag, MPI_COMM_WORLD, &status);
 
-      // for(i = 0; i < pivo; i++){
-      //   printf("%d - ", vet[i]);
-      // }
-      // printf("\n\n\n");
-
-      // for(i = pivo + 1; i < TAM; i++){
-      //   printf("%d - ", vet[i]);
-      // }
-      // printf("\n");
+     
+      pivo = pivo + 2;
+      //printf("\nPivo 2 = %d\n\n", pivo );
+      printf("Vetor 02 => ");
+      for(i = pivo; i < TAM; i++){
+        printf("%d - ", vet[i]);
+      }
+      printf("\n\n");
    }
 
    MPI_Finalize();
