@@ -5,7 +5,7 @@
 #include "ordenacao.c"
 #include "numerosAleatorios.c"
 
-#define TAM 20000
+#define TAM 200
 
 int main(int argc,char** argv)
 {
@@ -16,7 +16,7 @@ int main(int argc,char** argv)
    char    buffer[TAM];
    int vet[TAM];
    int *vet1, *vet2, *vet3;
-   int pivo;
+   int pivo01, pivo02, pivo03;
    int tag;
  
    MPI_Init(&argc, &argv);
@@ -31,24 +31,34 @@ int main(int argc,char** argv)
       preencheVetor(vet, TAM);
 
       // Separa um vetor em dois e retorna um pivô. 
-      pivo = separa(vet, 0, TAM);
+      pivo02 = separa(vet, 0, TAM);
+
+      pivo01 = separa(vet, 0, pivo02);
+
+      pivo03 = separa(vet, pivo02, TAM);
 
       // Empacgota o vetor para ser enviados aos processos
       //MPI_Pack(vet, TAM, MPI_INT, buffer, TAM * 4, &posicao, MPI_COMM_WORLD);
-     MPI_Send(vet, pivo , MPI_INT, 1, tag, MPI_COMM_WORLD);
-     MPI_Send(&vet[pivo + 1], (TAM - pivo), MPI_INT, 2, tag, MPI_COMM_WORLD);
+     MPI_Send(vet, pivo01 , MPI_INT, 1, tag, MPI_COMM_WORLD);
+     MPI_Send(&vet[pivo01 + 1], (pivo02 - pivo01), MPI_INT, 2, tag, MPI_COMM_WORLD);
+
+     
 
     // Envia o vetor para os outros processos
      //MPI_Bcast(buffer, TAM * 4, MPI_PACKED, 0, MPI_COMM_WORLD);
 
      // Envia o pivê para os outros processos
-     MPI_Bcast(&pivo, 1, MPI_INT, 0, MPI_COMM_WORLD); 
+     MPI_Bcast(&pivo01, 1, MPI_INT, 0, MPI_COMM_WORLD); 
+     MPI_Bcast(&pivo02, 1, MPI_INT, 0, MPI_COMM_WORLD); 
+     MPI_Bcast(&pivo03, 1, MPI_INT, 0, MPI_COMM_WORLD); 
      //MPI_Send(buffer, TAM * 4, MPI_PACKED, 1, tag, MPI_COMM_WORLD);
  
    }else{
       // 
       //MPI_Bcast(buffer, TAM * 4, MPI_PACKED, 0, MPI_COMM_WORLD);
-      MPI_Bcast(&pivo, 1, MPI_INT, 0, MPI_COMM_WORLD); 
+     MPI_Bcast(&pivo01, 1, MPI_INT, 0, MPI_COMM_WORLD); 
+     MPI_Bcast(&pivo02, 1, MPI_INT, 0, MPI_COMM_WORLD); 
+     MPI_Bcast(&pivo03, 1, MPI_INT, 0, MPI_COMM_WORLD); 
         //MPI_Bcast(buffer, 100, MPI_PACKED, 0, MPI_COMM_WORLD);
       posicao = 0;
     
@@ -62,8 +72,8 @@ int main(int argc,char** argv)
 
           vet1 = (int *)malloc(sizeof(int) * TAM);
 
-          MPI_Recv(vet1, pivo, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-          ordenacao(vet1, 0, pivo);
+          MPI_Recv(vet1, pivo01, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
+          ordenacao(vet1, 0, pivo01);
 
              // printf("\nVetor 01 => ");
              //  for(i = 0; i <= pivo; i++){
@@ -74,11 +84,11 @@ int main(int argc,char** argv)
           //free(vet1);
 
           // Envia os valores ordenados para o processo 0
-          MPI_Send(vet1, pivo, MPI_INT, 0, tag, MPI_COMM_WORLD);
+          MPI_Send(vet1, pivo01, MPI_INT, 0, tag, MPI_COMM_WORLD);
       }else if(rank == 2){// Se processo 2, ordena os valores do lado direto do pivô
-          vet2 = (int *)malloc(sizeof(int) * (TAM - pivo));
+          vet2 = (int *)malloc(sizeof(int) * (pivo02 - pivo01));
 
-          MPI_Recv(vet2, (TAM - pivo), MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
+          MPI_Recv(vet2, (pivo02 - pivo01), MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 
           //     printf("\nVetor 02 => ");
           //       for(i = 0; i < (TAM - pivo); i++){
@@ -86,12 +96,12 @@ int main(int argc,char** argv)
           //     }
           // printf("\n");
           
-          ordenacao(vet2, 0, (TAM - pivo));
+          ordenacao(vet2, 0, (pivo02 - pivo01));
 
           //free(vet2);
 
           // Envia os valores ordenados para o processo 0
-          MPI_Send(vet2, (TAM - pivo), MPI_INT, 0, tag, MPI_COMM_WORLD);
+          MPI_Send(vet2, (pivo02 - pivo01), MPI_INT, 0, tag, MPI_COMM_WORLD);
       }
       
    }
@@ -100,29 +110,30 @@ int main(int argc,char** argv)
    if (rank == 0){
 
      //Alocando novos vetores que armazenarão os números ordenados
-     vet1 = (int *)malloc(sizeof(int) * pivo);
-     vet2 = (int *)malloc(sizeof(int) * (TAM - pivo));
+     vet1 = (int *)malloc(sizeof(int) * pivo01);
+     vet2 = (int *)malloc(sizeof(int) * (pivo02 - pivo01));
      vet3 = (int *)malloc(sizeof(int) * TAM);
 
     
      // memcpy(vet3 + pivo, vet2, (TAM - pivo) * sizeof(int));
 
-      printf("\nPivo = %d\n\n", pivo );
+     printf("Pivo 01 %d\n", pivo01);
+     printf("Pivo 02 %d\n", pivo02);
 
-      MPI_Irecv(vet1, pivo, MPI_INT, 1, tag, MPI_COMM_WORLD, &request);
+      MPI_Irecv(vet1, pivo01, MPI_INT, 1, tag, MPI_COMM_WORLD, &request);
       MPI_Wait(&request, &status);
       //memcpy(vet3, vet1, pivo * sizeof(int));
 
       
 
-      // printf("Vetor 01 => ");
-      // for(i = 0; i < pivo; i++){
-      //   printf("%d - ", vet1[i]);
-      // }
-      // printf("\n\n");
+      printf("Vetor 01 => ");
+      for(i = 0; i < pivo01; i++){
+        printf("%d - ", vet1[i]);
+      }
+      printf("\n\n");
 
 
-      MPI_Irecv(vet2, (TAM - pivo), MPI_INT, 2, tag, MPI_COMM_WORLD, &request);
+      MPI_Irecv(vet2, (pivo02 - pivo01), MPI_INT, 2, tag, MPI_COMM_WORLD, &request);
       MPI_Wait(&request, &status);
 
       
