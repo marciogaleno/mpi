@@ -6,7 +6,7 @@
 //FUNÇÃO PARA VERIFICAR SE A ALGUM NUMERO REPETIDO
 int existe(int *vet,  int n, int tam){
 	int i; 
-	for(i = 0; i<= tam; i++){
+	for(i = 0; i< tam; i++){
 		if(vet[i] == n){
 			return 1;	
 		}
@@ -30,7 +30,7 @@ int proximoValor(int *vet, int tam){
 int preencheVetor(int *vet, int tam){
 	int i; 
 	
-	for(i = 0; i <= tam; i++){
+	for(i = 0; i < tam; i++){
 		vet[i] = proximoValor(vet, tam);
 		//fprintf(vetor, "%d \n", vet[i]);
 		//putc("\n", vetor);	

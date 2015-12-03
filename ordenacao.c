@@ -98,6 +98,6 @@ void ordenacao(int *vetor, int posicaoInicio, int posicaoFim){
 
 	pivo = separa(vetor, posicaoInicio, posicaoFim);
 	
-	mergeSort(vetor, posicaoInicio, pivo);
-	quickSort(vetor, pivo + 1, posicaoFim);
+	//mergeSort(vetor, posicaoInicio, posicaoFim);
+	quickSort(vetor, posicaoInicio, posicaoFim);
 }
