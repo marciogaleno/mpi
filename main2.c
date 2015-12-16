@@ -5,7 +5,7 @@
 #include "ordenacao.c"
 #include "numerosAleatorios.c"
 
-#define TAM 500
+#define TAM 50000
 
 int main(int argc,char** argv)
 {
@@ -289,10 +289,10 @@ int main(int argc,char** argv)
       //memcpy(&vet3[pivo], vet2, (TAM - pivo) * sizeof(int));
 
       // printf("Vetor 02 => ");
-      // for(i = 1; i < (TAM - pivo); i++){
-      //   printf("%d - ", vet2[i]);
-      // }
-      // printf("\n\n");
+      for(i = 1; i < TAM ; i++){
+        printf("%d - ", vet5[i]);
+      }
+      printf("\n\n");
 
       // MPI_Recv(vet, TAM, MPI_INT, 2, tag, MPI_COMM_WORLD, &status);
 
